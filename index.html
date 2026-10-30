@@ -5,50 +5,241 @@
   <meta charset="UTF-8">
   <meta name="viewport"
         content="width=device-width, initial-scale=1">
-  <title>BioGuard</title>
+  <title>BioGuard 2.0</title>
+
   <style>
+    * { box-sizing: border-box; }
+
     body {
-      font-family: Arial, sans-serif;
-      background: #e8f5e9;
-      text-align: center;
       margin: 0;
-      color: #234b32;
+      font-family: Arial, sans-serif;
+      background: #edf7ee;
+      color: #21452c;
     }
+
     header {
-      background: #2e7d32;
+      background: #236b38;
       color: white;
-      padding: 35px 15px;
+      text-align: center;
+      padding: 45px 15px;
     }
-    main { padding: 25px; }
+
+    header h1 { font-size: 38px; }
+
+    main {
+      max-width: 1100px;
+      margin: auto;
+      padding: 25px 18px;
+    }
+
+    .intro { text-align: center; }
+
+    #search {
+      display: block;
+      width: 100%;
+      max-width: 450px;
+      padding: 14px;
+      margin: 25px auto;
+      border: 1px solid #b6cbb9;
+      border-radius: 25px;
+      font-size: 16px;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns:
+        repeat(auto-fit, minmax(230px, 1fr));
+      gap: 22px;
+    }
+
     .card {
       background: white;
-      border-radius: 12px;
-      padding: 20px;
-      margin: 15px auto;
-      max-width: 450px;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px #00000015;
+    }
+
+    .card img {
+      width: 100%;
+      height: 190px;
+      object-fit: cover;
+      background: #d9e9dc;
+    }
+
+    .details { padding: 18px; }
+
+    .status {
+      display: inline-block;
+      background: #fff0ce;
+      color: #805000;
+      padding: 7px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .critical {
+      background: #ffe0e0;
+      color: #a32020;
+    }
+
+    .vulnerable {
+      background: #e4eafc;
+      color: #344b91;
+    }
+
+    footer {
+      text-align: center;
+      background: #236b38;
+      color: white;
+      padding: 22px;
+      margin-top: 35px;
     }
   </style>
 </head>
+
 <body>
   <header>
-    <h1>🌿 BioGuard</h1>
+    <h1>🌿 BioGuard 2.0</h1>
     <p>Protect Nature. Preserve Biodiversity.</p>
   </header>
 
   <main>
-    <h2>Welcome to BioGuard</h2>
-    <p>Learn about endangered species
-       and protect our ecosystems.</p>
+    <section class="intro">
+      <h2>Endangered Animals Gallery</h2>
+      <p>
+        Discover amazing wildlife and learn
+        why biodiversity matters.
+      </p>
+    </section>
 
-    <div class="card">
-      <h3>🐘 Endangered Species</h3>
-      <p>Discover animals that need protection.</p>
-    </div>
+    <input
+      id="search"
+      type="search"
+      placeholder="🔍 Search animals..."
+      aria-label="Search animals"
+    >
 
-    <div class="card">
-      <h3>🌳 Ecosystem Conservation</h3>
-      <p>Learn how to protect natural habitats.</p>
-    </div>
+    <div class="gallery" id="gallery"></div>
+    <p id="empty" hidden>No animals found.</p>
+
+    <section class="intro">
+      <h2>Why Protect Biodiversity?</h2>
+      <p>
+        Every species plays an important role
+        in keeping ecosystems healthy.
+        Protecting habitats helps wildlife survive.
+      </p>
+    </section>
   </main>
+
+  <footer>
+    <p>© BioGuard | Biodiversity Awareness</p>
+  </footer>
+
+  <script>
+    const animals = [
+      {
+        name: "Bengal Tiger",
+        status: "Endangered",
+        habitat: "Forests and grasslands",
+        image: "Panthera tigris tigris"
+      },
+      {
+        name: "Asian Elephant",
+        status: "Endangered",
+        habitat: "Asian forests and grasslands",
+        image: "Elephas maximus"
+      },
+      {
+        name: "Giant Panda",
+        status: "Vulnerable",
+        habitat: "Mountain bamboo forests",
+        image: "Ailuropoda melanoleuca"
+      },
+      {
+        name: "Bornean Orangutan",
+        status: "Critically Endangered",
+        habitat: "Borneo tropical rainforests",
+        image: "Pongo pygmaeus"
+      }
+    ];
+
+    const gallery = document.getElementById("gallery");
+    const search = document.getElementById("search");
+    const empty = document.getElementById("empty");
+
+    function showAnimals(query = "") {
+      gallery.innerHTML = "";
+
+      const filtered = animals.filter(animal =>
+        animal.name.toLowerCase()
+          .includes(query.toLowerCase())
+      );
+
+      empty.hidden = filtered.length !== 0;
+
+      filtered.forEach(animal => {
+        const card = document.createElement("article");
+        card.className = "card";
+
+        const img = document.createElement("img");
+        img.alt = animal.name;
+        img.loading = "lazy";
+
+        const details = document.createElement("div");
+        details.className = "details";
+
+        const title = document.createElement("h3");
+        title.textContent = animal.name;
+
+        const habitat = document.createElement("p");
+        habitat.textContent = "Habitat: " + animal.habitat;
+
+        const status = document.createElement("span");
+        status.className = "status";
+
+        if (animal.status === "Critically Endangered") {
+          status.classList.add("critical");
+        } else if (animal.status === "Vulnerable") {
+          status.classList.add("vulnerable");
+        }
+
+        status.textContent = animal.status;
+
+        details.append(title, habitat, status);
+        card.append(img, details);
+        gallery.appendChild(card);
+
+        const api = "https://en.wikipedia.org/w/api.php";
+        const params = new URLSearchParams({
+          action: "query",
+          titles: animal.image,
+          prop: "pageimages",
+          pithumbsize: "600",
+          format: "json",
+          origin: "*"
+        });
+
+        fetch(api + "?" + params)
+          .then(response => response.json())
+          .then(data => {
+            const pages = Object.values(data.query.pages);
+            if (pages[0].thumbnail) {
+              img.src = pages[0].thumbnail.source;
+            }
+          })
+          .catch(() => {
+            img.alt = animal.name + " image unavailable";
+          });
+      });
+    }
+
+    search.addEventListener("input", () => {
+      showAnimals(search.value);
+    });
+
+    showAnimals();
+  </script>
 </body>
 </html>
